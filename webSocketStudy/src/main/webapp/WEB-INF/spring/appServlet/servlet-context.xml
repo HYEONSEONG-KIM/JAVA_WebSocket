@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:websocket="http://www.springframework.org/schema/websocket"
+	xsi:schemaLocation="http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.3.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+
+	<context:component-scan base-package="websocket.spring" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+		<context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+	</context:component-scan>
+
+	<annotation-driven validator="validator"></annotation-driven>
+	
+	<!-- 메세지 파일이 있는 위치 경로 설정하여 message 읽어오기 -->
+	<beans:bean id = "messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
+		p:basenames="kr.or.ddit.msgs.errorMessage"/>
+
+	<!-- validator bean 주입 -->
+	<beans:bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"
+		p:validationMessageSource-ref="messageSource"/>
+	
+	
+	<resources location="/resources/" mapping="/resources/**" cache-period="0"></resources>
+	
+	
+	<!-- View Resolver -->
+	<!-- 이녀석은 없으면 바로 404...그래서 뒷순서로!! -->
+	<beans:bean id = "IRVR" class = "org.springframework.web.servlet.view.InternalResourceViewResolver"
+		p:prefix="/WEB-INF/views/"
+		p:suffix=".jsp"
+	/>
+	
+	<!-- 뷰 네임을 뒤져서 같은게 있으면 찾아가는 역할 -->
+	<beans:bean id = "BNVR" class = "org.springframework.web.servlet.view.BeanNameViewResolver"
+		p:order="1"
+	/>
+	
+<!-- 	<beans:bean id = "downloadView" class= "kr.or.ddit.board.view.DownloadView"/> -->
+
+
+	
+	<!-- 어댑터가 이 id로 사용해야 하므로 무조건!! -->
+	<beans:bean id = "multipartResolver" class = "org.springframework.web.multipart.support.StandardServletMultipartResolver" />
+	
+	
+</beans:beans>
