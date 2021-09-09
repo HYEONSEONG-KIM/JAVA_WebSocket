@@ -16,6 +16,8 @@
 <input type = "button" value = "2번채팅방" class = "chatRoomBtn" data-room = "2"/>
 <input type="text"id="message" onchange="messageSend(event);"/>
 <input type="button" value="종료" onclick="disconnect(event);">
+<input type="button" value="test" onclick="messageSend2(event);">
+
 	<div id="messagesArea"></div>
 	
 <script type="text/javascript">
@@ -47,13 +49,24 @@
 					let body=JSON.parse(messageFrame.body); 
 					let msgTag=document.createElement("p");
 					
+					
 				if(body.sender==SUB_ID)
 					msgTag.classList.add("my");
 				
-					msgTag.innerHTML=body.message+ "["+body.sender+"]";
+					let message = body.message;
+					let name = body.sender.substring(body.sender.indexOf(',')+1)
+				
+					msgTag.innerHTML= message+ "["+ name +"]";
 					messageArea.appendChild(msgTag);
 					
 					}, {id:SUB_ID});
+				
+				// 하나의 잡지사의 다른 잡지의 개념
+				client.subscribe("/topic/test/"+ roomNo, function(messageFrame){
+					alert(messageFrame.body);
+					
+				});
+				
 				});
 				
 				let msgTag=document.createElement( "p");
@@ -77,11 +90,23 @@
 // 서버사이드의 메시지 처리 없이 에코되는 메시지전송
 // client.send("/topic/echoed", headers, JSON.stringify(body));
 // 서버사이드의 메시지 핸들러에서 처리될 메시지 전송
-		client.send("/app/handledEcho/"+chatRoom, headers, JSON.stringify(body));
+		client.send("/app/handleds/"+chatRoom, headers, JSON.stringify(body));
 		event.target.value="";
 		event.target.focus();
 	}
 
+	function messageSend2(event){
+		if(! client || ! client.connected) throw "stomp연결 수립 전";
+		let body={ sender : SUB_ID, message :event.target.value}
+// 서버사이드의 메시지 처리 없이 에코되는 메시지전송
+// client.send("/topic/echoed", headers, JSON.stringify(body));
+// 서버사이드의 메시지 핸들러에서 처리될 메시지 전송
+		client.send("/app/handledEcho2/"+chatRoom, headers, JSON.stringify(body));
+		event.target.value="";
+		event.target.focus();
+	}
+	
+	
 	function disconnect(event){
 		if(! client || ! client.connected) throw "stomp 연결 수립 전";
 			client.disconnect();
