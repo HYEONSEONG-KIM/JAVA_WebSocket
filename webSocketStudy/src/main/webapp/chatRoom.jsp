@@ -29,48 +29,42 @@
 	let SUB_ID=null; 
 	function init(roomNo){
 	<!-- // stomp-endpoint로 양방향 통신 연결 수립  -->
-		var sockJS=new SockJS("${pageContext.request.contextPath}/stomp/echo");
-			// sockJS 연결 기반하에 Stomp client 객체 생성 
+		var sockJS=new SockJS("${pageContext.request.contextPath}/stomp/chatRoom");
+			
+		// sockJS 연결 기반하에 Stomp client 객체 생성 
 			client=Stomp.over(sockJS); 
 			// Stomp CONNECTframe 전송  
 			client.connect(headers, function(connectFrame){
 				
 				// CONNECTED frame 을 받은 후, echo 메시지 프레임을 수신을 위한
-				//SUBSCRIBE frame에서 사용할 구독아이디를 생성하기 위해
+				// SUBSCRIBE frame에서 사용할 구독아이디를 생성하기 위해
 				// 구독 요청 핸들러 쪽으로 전송되는 SUBSCRIBE frame
 				// 단 한번의 응답만을수신함.
-				client.subscribe("/app/handledEcho/" + roomNo, function(messageFrame){
-					console.log(messageFrame.headers)
-					SUB_ID=messageFrame.body;
-					headers.sub_id=SUB_ID; 
-				// Simple Message Broker 로 부터 브로드캐스팅 되는 에코메시지를 구독하기 위한 SUBSCRIBE frame 전송
-				
-				client.subscribe("/topic/echoed/"+ roomNo, function(messageFrame){
-					let body=JSON.parse(messageFrame.body); 
-					let msgTag=document.createElement("p");
+				client.subscribe("/app/handled/" + roomNo, function(messageFrame){
+						SUB_ID=messageFrame.body;
+						headers.sub_id=SUB_ID; 
+						// Simple Message Broker 로 부터 브로드캐스팅 되는 에코메시지를 구독하기 위한 SUBSCRIBE frame 전송
 					
-					
-				if(body.sender==SUB_ID)
-					msgTag.classList.add("my");
-				
-					let message = body.message;
-					let name = body.sender.substring(body.sender.indexOf(',')+1)
-				
-					msgTag.innerHTML= message+ "["+ name +"]";
-					messageArea.appendChild(msgTag);
-					
-					}, {id:SUB_ID});
-				
-				// 하나의 잡지사의 다른 잡지의 개념
-				client.subscribe("/topic/test/"+ roomNo, function(messageFrame){
-					alert(messageFrame.body);
-					
-				});
+						client.subscribe("/topic/echoed/"+ roomNo, function(messageFrame){
+						let body=JSON.parse(messageFrame.body); 
+						let msgTag=document.createElement("p");
+						
+						
+						if(body.sender==SUB_ID)
+							msgTag.classList.add("my");
+						
+							let message = body.message;
+							let name = body.sender.substring(body.sender.indexOf(',')+1)
+						
+							msgTag.innerHTML= message+ "["+ name +"]";
+							messageArea.appendChild(msgTag);
+							
+							}, {id:SUB_ID});
 				
 				});
 				
 				let msgTag=document.createElement( "p");
-				msgTag.innerHTML="연결수립";
+				msgTag.innerHTML= roomNo + "번방 연결수립";
 			
 				messageArea.appendChild(msgTag);
 				
@@ -87,25 +81,16 @@
 	function messageSend(event){
 		if(! client || ! client.connected) throw "stomp연결 수립 전";
 		let body={ sender : SUB_ID, message :event.target.value}
-// 서버사이드의 메시지 처리 없이 에코되는 메시지전송
-// client.send("/topic/echoed", headers, JSON.stringify(body));
-// 서버사이드의 메시지 핸들러에서 처리될 메시지 전송
+		// 서버사이드의 메시지 처리 없이 에코되는 메시지전송
+		// client.send("/topic/echoed", headers, JSON.stringify(body));
+		// 서버사이드의 메시지 핸들러에서 처리될 메시지 전송
 		client.send("/app/handleds/"+chatRoom, headers, JSON.stringify(body));
 		event.target.value="";
 		event.target.focus();
 	}
-
-	function messageSend2(event){
-		if(! client || ! client.connected) throw "stomp연결 수립 전";
-		let body={ sender : SUB_ID, message :event.target.value}
-// 서버사이드의 메시지 처리 없이 에코되는 메시지전송
-// client.send("/topic/echoed", headers, JSON.stringify(body));
-// 서버사이드의 메시지 핸들러에서 처리될 메시지 전송
-		client.send("/app/handledEcho2/"+chatRoom, headers, JSON.stringify(body));
-		event.target.value="";
-		event.target.focus();
-	}
 	
+	
+	let roomBtn = $('.chatRoomBtn');
 	
 	function disconnect(event){
 		if(! client || ! client.connected) throw "stomp 연결 수립 전";
@@ -113,14 +98,17 @@
 			let msgTag=document.createElement("p");
 			msgTag.innerHTML="연결종료";
 			messageArea.appendChild(msgTag);
+			
+			$(roomBtn).each(function(){
+				$(this).attr("disabled", false);
+			})
 		}
 	
 	
 	$('.chatRoomBtn').on('click',function(){
 		chatRoom = $(this).data('room');
-		let roomBtn = $('.chatRoomBtn');
 		$(roomBtn).each(function(){
-			$(this).attr("disabled", "false");
+			$(this).attr("disabled", true);
 		})
 		
 		init(chatRoom);

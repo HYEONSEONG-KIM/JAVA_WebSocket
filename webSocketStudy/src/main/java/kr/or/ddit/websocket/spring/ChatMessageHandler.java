@@ -1,4 +1,4 @@
-package websocket.spring;
+package kr.or.ddit.websocket.spring;
 
 import java.util.Map;
 import java.util.UUID;
@@ -15,13 +15,16 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.socket.BinaryMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-public class EchoMessageHandler {
+public class ChatMessageHandler{
 
 	@Data
 	public static class MessageVO{
@@ -29,38 +32,31 @@ public class EchoMessageHandler {
 		private String message;
 	}
 	
+	
 	@Inject
 	private SimpMessagingTemplate messagingTemplate;
 	
 	
-	@MessageMapping("/handleds/{test}")
-//	@SendTo("/topic/echoed")
-	public void handler(@DestinationVariable String test, @Payload MessageVO messageVO, @Header("sub_id") String id )
+
+	@MessageMapping("/handleds/{chatRoom}")
+	public void handler(@DestinationVariable String chatRoom, @Payload MessageVO messageVO, @Header("sub_id") String id )
 	throws Exception{
 		log.info("id header : {}", id);
 		log.info("sender : {}, message : {}", messageVO.getSender(), messageVO.getMessage());
-//		return messageVO;
-		messagingTemplate.convertAndSend("/topic/echoed/" + test, messageVO);
+		messagingTemplate.convertAndSend("/topic/echoed/" + chatRoom, messageVO);
 	}
 	
-	@MessageMapping("/handledEcho2/{test}")
-//	@SendTo("/topic/echoed")
-	public void handler2(@DestinationVariable String test)
-	throws Exception{
-//		return messageVO;
-		messagingTemplate.convertAndSend("/topic/test/" + test, "test");
-	}
+
 	
-	
-	@SubscribeMapping("/handledEcho/{roomNo}")
+	@SubscribeMapping("/handled/{chatRoom}")
 	public String subscribeHandler(
-				@DestinationVariable String roomNo,
+				@DestinationVariable String chatRoom,
 				@Headers Map<String, Object> headers
 			) {
 		log.info("headers : {}", headers);
-		log.info("roomNo : {}", roomNo);
+		log.info("roomNo : {}", chatRoom);
 		// subscription id 를 생성함.
-		String sub_id = "test,홍길동";
+		String sub_id = UUID.randomUUID().toString();
 		return sub_id;
 	}
 }

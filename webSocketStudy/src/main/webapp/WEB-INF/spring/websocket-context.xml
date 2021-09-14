@@ -15,15 +15,24 @@
 		p:maxSessionIdleTimeout="30000"
 		p:maxBinaryMessageBufferSize="8192"
 	/>
+	
+	<bean class="kr.or.ddit.websocket.spring.ChatMessageHandler" id = "chatMessageHandler"></bean>
+	<bean class="kr.or.ddit.websocket.spring.PushHandler" id = "pushHandler"></bean>
 
-	<websocket:message-broker
-		application-destination-prefix="/app">
-		<websocket:stomp-endpoint path="/stomp/echo"
+	<websocket:message-broker application-destination-prefix="/app">
+		<websocket:stomp-endpoint path="/stomp/chatRoom"
 			allowed-origins="*">
 			<websocket:sockjs />
 		</websocket:stomp-endpoint>
+		
+		<websocket:stomp-endpoint path="/stomp/push"
+			allowed-origins="*">
+			<websocket:sockjs />
+		</websocket:stomp-endpoint>
+		
 		<websocket:simple-broker
 			prefix="/topic, /queue" />
+			
 	</websocket:message-broker>
 	
 </beans>

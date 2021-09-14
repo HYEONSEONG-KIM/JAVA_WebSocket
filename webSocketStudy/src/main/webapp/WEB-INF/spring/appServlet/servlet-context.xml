@@ -12,13 +12,13 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
 
 
-	<context:component-scan base-package="websocket.spring" use-default-filters="false">
+
+	<context:component-scan base-package="kr.or.ddit" use-default-filters="false">
 		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
 		<context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
 	</context:component-scan>
 
 	<annotation-driven validator="validator"></annotation-driven>
-	
 	<!-- 메세지 파일이 있는 위치 경로 설정하여 message 읽어오기 -->
 	<beans:bean id = "messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
 		p:basenames="kr.or.ddit.msgs.errorMessage"/>
@@ -49,6 +49,5 @@
 	
 	<!-- 어댑터가 이 id로 사용해야 하므로 무조건!! -->
 	<beans:bean id = "multipartResolver" class = "org.springframework.web.multipart.support.StandardServletMultipartResolver" />
-	
 	
 </beans:beans>

@@ -318,6 +318,7 @@
 				<version>0.4.14</version>
 			</dependency>
 
+	<!-- 소켓 -->
 		
 			<dependency>
 				<groupId>javax.websocket</groupId>
